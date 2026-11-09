@@ -334,6 +334,9 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
   .add-hub { width: auto; margin-top: 0; padding: 6px 10px; }
   .add-hub-lbl { display: none; }
   .add-hub { width: 38px; height: 38px; padding: 0; justify-content: center; flex: none; }
+  .hub-list:empty { display: none; }
+  .hub-list:empty + .add-hub { width: auto; padding: 0 12px; }
+  .hub-list:empty + .add-hub .add-hub-lbl { display: inline; }
   .hub-list-wrap { display: flex; gap: 6px; align-items: center; min-width: 0; }
   .hub-list-wrap .hub-list { flex: 1; min-width: 0; }
   .shelf-foot { margin-top: 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
@@ -1162,9 +1165,12 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     var items = filterItems(S, V);
     var html = '';
 
+    var saveWarning = persistent ? '' : '<div class="notice err"><p>Este navegador não está permitindo salvar a estante (janela anônima ou dados bloqueados). O que você adicionar some ao fechar a página, a não ser que faça um backup.</p>' +
+      '<button class="btn sm" type="button" data-action="backup">Fazer backup</button></div>';
     if (!S.hubs.length) {
-      view.innerHTML = '<div class="empty"><h3>Comece criando uma matéria</h3><p>Cada matéria é uma prateleira da sua estante, com pastas e materiais. Ex.: Linguagem, Matemática, Música.</p>' +
-        '<button class="btn primary" type="button" data-action="new-hub">' + icon('plus') + 'Criar matéria</button></div>';
+      view.innerHTML = saveWarning + '<div class="empty"><h3>Sua estante está vazia</h3><p>Comece criando uma matéria. Cada matéria é uma prateleira da estante, com pastas e materiais. Ex.: Linguagem, Matemática, Música.</p>' +
+        '<button class="btn primary" type="button" data-action="new-hub">' + icon('plus') + 'Criar matéria</button>' +
+        '<p>Recebeu um arquivo de outra professora? <button class="btn sm" type="button" data-action="backup">Abrir arquivo</button></p></div>';
       return;
     }
 
@@ -1210,10 +1216,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
       S.goals.map(function (g) { return '<option' + (V.goal === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') +
       '</select></div></div>';
 
-    if (!persistent) {
-      html += '<div class="notice err"><p>Este navegador não está permitindo salvar a estante (janela anônima ou dados bloqueados). O que você adicionar some ao fechar a página, a não ser que faça um backup.</p>' +
-        '<button class="btn sm" type="button" data-action="backup">Fazer backup</button></div>';
-    }
+    html += saveWarning;
     if (S.items.some(function (i) { return i.example; })) {
       html += '<div class="notice"><p>Os materiais marcados como <strong>Exemplo</strong> mostram como a estante funciona. Quando quiser, remova todos de uma vez.</p>' +
         '<button class="btn sm" type="button" data-action="clear-examples">Remover exemplos</button></div>';
@@ -1695,7 +1698,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     var restored = null;
     if (saved) { try { restored = sanitizeImport(saved, { keepFileRefs: true }).state; } catch (e) { restored = null; } }
     if (restored) { S = restored; if (migrateState(S)) save(); }
-    else { S = seedState(); save(); }
+    else { S = emptyState(); save(); }
     V.hubId = S.hubs[0] ? S.hubs[0].id : null;
     saveStatus = persistent ? 'Tudo salvo neste navegador' : 'Salvo só até fechar a página';
     render();
