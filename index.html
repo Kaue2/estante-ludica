@@ -1,0 +1,1708 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estante Lúdica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Biblioteca digital de atividades lúdicas para professores da Educação Infantil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: estante lateral com as matérias (lombadas coloridas) + mesa de trabalho com pastas, filtros e cartões de materiais */
+:root {
+  --paper: #F3F6F4;
+  --surface: #FFFFFF;
+  --surface-2: #E9EFEC;
+  --ink: #182826;
+  --muted: #53625F;
+  --line: #D5DEDA;
+  --accent: #0C7560;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D3ECE4;
+  --sun: #B97A06;
+  --sun-soft: #FBEBC7;
+  --danger: #B3261E;
+  --danger-soft: #FBE2DF;
+  --shadow: 0 1px 2px rgb(16 40 34 / .06), 0 6px 18px rgb(16 40 34 / .07);
+  --focus: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --step--1: .8125rem;
+  --step-0: .9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.125rem;
+  --r: 14px;
+  --r-sm: 9px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101816; --surface: #18221F; --surface-2: #202C29; --ink: #E4EDEA; --muted: #9AABA7; --line: #2C3A36;
+    --accent: #3FC2A1; --accent-ink: #072019; --accent-soft: #173B32; --sun: #F2C14E; --sun-soft: #3A2F12;
+    --danger: #FF8A80; --danger-soft: #3B1C1A; --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101816; --surface: #18221F; --surface-2: #202C29; --ink: #E4EDEA; --muted: #9AABA7; --line: #2C3A36;
+  --accent: #3FC2A1; --accent-ink: #072019; --accent-soft: #173B32; --sun: #F2C14E; --sun-soft: #3A2F12;
+  --danger: #FF8A80; --danger-soft: #3B1C1A; --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.5;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- Estrutura ---------- */
+.app { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 100%; }
+.shelf {
+  background: var(--surface); border-right: 1px solid var(--line);
+  padding-block: 22px 18px; padding-inline: 16px;
+  display: flex; flex-direction: column; gap: 18px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.desk {
+  min-width: 0;
+  padding-block: 22px 56px;
+  padding-left: max(28px, env(safe-area-inset-left, 0px));
+  padding-right: max(28px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ---------- Estante ---------- */
+.brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; }
+.brand-mark { display: flex; gap: 3px; align-items: flex-end; height: 30px; }
+.brand-mark span { width: 7px; border-radius: 3px 3px 1px 1px; }
+.brand-mark span:nth-child(1) { height: 26px; background: #E0663A; }
+.brand-mark span:nth-child(2) { height: 30px; background: #2F80B7; }
+.brand-mark span:nth-child(3) { height: 22px; background: #D9A21B; transform: rotate(9deg); transform-origin: bottom left; margin-left: 2px; }
+.brand h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.375rem; margin: 0; letter-spacing: -.01em; line-height: 1.1; }
+.brand small { display: block; color: var(--muted); font-size: var(--step--1); }
+
+.shelf-label {
+  font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+  font-weight: 700; padding-inline: 8px; margin: 0 0 6px;
+}
+.hub-list, .quick-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.hub-btn {
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+  border: 0; background: transparent; padding: 7px 8px; border-radius: 10px; cursor: pointer;
+}
+.hub-btn:hover { background: var(--surface-2); }
+.hub-btn[aria-current="true"] { background: color-mix(in srgb, var(--hub, var(--accent)) 16%, var(--surface)); font-weight: 700; }
+.spine {
+  width: 28px; height: 34px; border-radius: 4px 6px 6px 4px; flex: none;
+  background: var(--hub, var(--accent)); color: #fff;
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 600; font-size: .95rem;
+  box-shadow: inset 4px 0 0 rgb(0 0 0 / .14);
+}
+.quick .spine { background: var(--surface-2); color: var(--ink); box-shadow: none; }
+.quick .spine.sun { background: var(--sun-soft); color: var(--sun); }
+.hub-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.count { color: var(--muted); font-size: var(--step--1); font-variant-numeric: tabular-nums; }
+.add-hub {
+  display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 4px;
+  border: 1px dashed var(--line); background: transparent; color: var(--muted);
+  border-radius: 10px; padding: 8px 10px; cursor: pointer;
+}
+.add-hub:hover { color: var(--accent); border-color: var(--accent); }
+.shelf-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; font-size: var(--step--1); color: var(--muted); }
+.shelf-foot .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.save-state { display: flex; align-items: center; gap: 6px; }
+.save-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.save-state.warn::before { background: var(--danger); }
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 7px 14px; cursor: pointer; text-decoration: none; font-weight: 700; font-size: var(--step--1);
+  white-space: nowrap;
+}
+.btn:hover { border-color: color-mix(in srgb, var(--ink) 35%, var(--line)); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); background: var(--surface-2); }
+.btn.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); background: transparent; }
+.btn.danger:hover { background: var(--danger-soft); }
+.btn.sm { padding: 5px 11px; }
+.icon-btn {
+  width: 36px; height: 36px; display: inline-grid; place-items: center; border-radius: 50%;
+  border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.icon-btn[aria-pressed="true"].fav { color: var(--sun); }
+.icon-btn[aria-pressed="true"].fav svg { fill: currentColor; }
+.icon-btn[aria-pressed="true"].week { color: var(--accent); background: var(--accent-soft); }
+
+/* ---------- Mesa ---------- */
+.searchbar {
+  display: flex; align-items: center; gap: 10px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px 4px 16px; box-shadow: var(--shadow);
+  max-width: 720px;
+}
+.searchbar:focus-within { border-color: var(--accent); }
+.searchbar input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 8px 0; outline: none; font-size: var(--step-0); }
+.searchbar input::-webkit-search-cancel-button { display: none; }
+
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.head-title .spine { width: 40px; height: 52px; font-size: 1.35rem; }
+.eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.head h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: var(--step-3); line-height: 1.05;
+  margin: 2px 0 0; letter-spacing: -.015em; text-wrap: balance; overflow-wrap: anywhere;
+}
+.head p { margin: 4px 0 0; color: var(--muted); font-size: var(--step--1); }
+.head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.folders { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.folder {
+  display: inline-flex; align-items: center; gap: 7px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; cursor: pointer; font-size: var(--step--1);
+}
+.folder:hover { border-color: var(--hub, var(--accent)); }
+.folder[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--hub, var(--accent)) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--hub, var(--accent)) 60%, var(--line)); font-weight: 700;
+}
+.folder .count { font-size: .75rem; }
+.folder.add { border-style: dashed; color: var(--muted); background: transparent; }
+
+.filters { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; }
+.seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.seg button {
+  display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--muted);
+  padding: 5px 10px; border-radius: 999px; cursor: pointer; font-size: var(--step--1);
+}
+.seg button svg.i { width: 15px; height: 15px; }
+.seg button:hover { background: var(--surface-2); color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 700; }
+.goal-select { display: flex; align-items: center; gap: 6px; font-size: var(--step--1); color: var(--muted); }
+.goal-select select { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 10px; max-width: 220px; }
+
+.notice {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  background: var(--sun-soft); border-radius: var(--r-sm); padding: 10px 14px; font-size: var(--step--1);
+}
+.notice.err { background: var(--danger-soft); }
+.notice p { margin: 0; min-width: 0; flex: 1 1 260px; }
+
+/* ---------- Cartões ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 16px; }
+.card {
+  display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden; min-width: 0; box-shadow: var(--shadow);
+}
+.thumb {
+  position: relative; aspect-ratio: 16 / 8; max-width: 100%;
+  background: color-mix(in srgb, var(--hub, var(--accent)) 20%, var(--surface));
+  color: color-mix(in srgb, var(--hub, var(--accent)) 75%, var(--ink));
+  display: grid; place-items: center; overflow: hidden;
+}
+.thumb svg.i { width: 40px; height: 40px; stroke-width: 1.6; }
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumb .badge {
+  position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface); color: var(--ink); border-radius: 999px; padding: 3px 9px 3px 7px;
+  font-size: .75rem; font-weight: 700; box-shadow: var(--shadow);
+}
+.thumb .badge svg.i { width: 13px; height: 13px; }
+.card-body { padding: 12px 14px 4px; display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.where { font-size: .75rem; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tag-ex { background: var(--sun-soft); color: var(--sun); border-radius: 999px; padding: 0 7px; font-weight: 700; }
+.card h3 { margin: 0; font-size: var(--step-1); line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+.notes { margin: 0; color: var(--muted); font-size: var(--step--1); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip {
+  border: 0; cursor: pointer; font-size: .75rem; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); color: color-mix(in srgb, var(--accent) 80%, var(--ink));
+}
+.chip.tag { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.chip:hover { filter: brightness(.96); text-decoration: underline; }
+.card-actions { display: flex; align-items: center; gap: 2px; padding: 8px 8px 10px 14px; }
+.card-actions .btn { margin-right: auto; min-width: 0; max-width: calc(100% - 118px); }
+.card-actions .btn .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+.empty {
+  border: 1.5px dashed var(--line); border-radius: var(--r); padding: 36px 24px; text-align: center; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.empty h3 { margin: 0; color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: var(--step-2); }
+.empty p { margin: 0; max-width: 46ch; }
+
+/* ---------- Diálogos ---------- */
+dialog {
+  border: 0; border-radius: 18px; padding: 0; width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
+  background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgb(0 0 0 / .3);
+}
+dialog::backdrop { background: rgb(10 20 18 / .45); }
+dialog form { display: flex; flex-direction: column; max-height: calc(100dvh - 32px); }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 8px; }
+.dlg-head h2 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: var(--step-2); }
+.dlg-body { padding: 8px 20px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.dlg-body > p { margin: 0; color: var(--muted); }
+.dlg-foot { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; padding: 12px 20px 18px; border-top: 1px solid var(--line); }
+.dlg-foot .spacer { margin-right: auto; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > label, .field > .lbl { font-weight: 700; font-size: var(--step--1); }
+.field .hint { color: var(--muted); font-size: .75rem; }
+.field .err { color: var(--danger); font-size: .8125rem; font-weight: 700; }
+.field input[type="text"], .field input[type="url"], .field select, .field textarea {
+  width: 100%; border: 1px solid var(--line); background: var(--paper); border-radius: 10px; padding: 9px 12px;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
+.field textarea { resize: vertical; min-height: 72px; }
+.field[data-invalid] input, .field[data-invalid] select { border-color: var(--danger); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.type-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.type-pick label {
+  display: flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px;
+  cursor: pointer; font-size: var(--step--1);
+}
+.type-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.type-pick label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.type-pick label:has(input:focus-visible) { box-shadow: var(--focus); }
+.goal-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.goal-pick label {
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: var(--step--1); cursor: pointer;
+}
+.goal-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.goal-pick label:has(input:checked) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.goal-pick label:has(input:focus-visible) { box-shadow: var(--focus); }
+.file-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--step--1); }
+.file-row input[type="file"] { max-width: 100%; }
+.file-pick:focus-within label.btn { box-shadow: var(--focus); }
+.file-name { color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.sep { border: 0; border-top: 1px solid var(--line); margin: 2px 0; }
+.mode-pick { display: flex; flex-direction: column; gap: 8px; }
+.mode-pick label {
+  display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; cursor: pointer;
+}
+.mode-pick label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.mode-pick input { margin-top: 4px; accent-color: var(--accent); flex: none; }
+.mode-pick small { display: block; color: var(--muted); font-size: .8125rem; }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatches label { width: 34px; height: 34px; border-radius: 8px; background: var(--c); cursor: pointer; display: grid; place-items: center; color: #fff; }
+.swatches input { position: absolute; opacity: 0; pointer-events: none; }
+.swatches label:has(input:checked) { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--c); }
+.swatches label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+.swatches label svg { display: none; }
+.swatches label:has(input:checked) svg { display: block; }
+textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .75rem; min-height: 110px; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: var(--step--1);
+  transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Telas estreitas ---------- */
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .shelf {
+    position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line);
+    padding-block: 14px 12px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    gap: 10px;
+  }
+  .shelf-section { min-width: 0; }
+  .shelf-label { display: none; }
+  .hub-list, .quick-list { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: thin; }
+  .hub-list li, .quick-list li { flex: none; }
+  .hub-btn { width: auto; padding: 5px 10px 5px 5px; border: 1px solid var(--line); }
+  .hub-btn .spine { width: 22px; height: 26px; font-size: .8rem; }
+  .hub-name { max-width: 150px; }
+  .add-hub { width: auto; margin-top: 0; padding: 6px 10px; }
+  .add-hub-lbl { display: none; }
+  .add-hub { width: 38px; height: 38px; padding: 0; justify-content: center; flex: none; }
+  .hub-list-wrap { display: flex; gap: 6px; align-items: center; min-width: 0; }
+  .hub-list-wrap .hub-list { flex: 1; min-width: 0; }
+  .shelf-foot { margin-top: 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .desk { padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .head h2 { font-size: 1.75rem; }
+}
+@media (max-width: 480px) {
+  .two { grid-template-columns: 1fr; }
+  .type-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .head-actions .btn .lbl-long { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20 7 4"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.1"/><circle cx="15.5" cy="15.5" r="1.1"/><circle cx="15.5" cy="8.5" r="1.1"/><circle cx="8.5" cy="15.5" r="1.1"/><circle cx="12" cy="12" r="1.1"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2.5 15 8.6 21.6 9.5 16.8 14.2 18 20.8 12 17.6 6 20.8 7.2 14.2 2.4 9.5 9 8.6 12 2.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="shelf" id="shelf" aria-label="Matérias"></aside>
+  <main class="desk">
+    <div class="searchbar" role="search">
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <label for="q" class="sr">Buscar materiais</label>
+      <input id="q" type="search" autocomplete="off" placeholder="Buscar em todas as matérias: tema, objetivo, título…">
+      <button class="icon-btn" id="q-clear" type="button" aria-label="Limpar busca" hidden><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div id="view" aria-live="polite"></div>
+  </main>
+</div>
+
+<!-- Material -->
+<dialog id="dlg-item" aria-labelledby="dlg-item-title">
+  <form id="form-item" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-item-title">Adicionar material</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="field" id="f-title">
+        <label for="item-title">Título</label>
+        <input id="item-title" type="text" maxlength="140" placeholder="Ex.: Música das vogais">
+        <span class="err" hidden></span>
+      </div>
+      <div class="field">
+        <span class="lbl" id="lbl-type">Tipo de material</span>
+        <div class="type-pick" id="item-type" role="radiogroup" aria-labelledby="lbl-type"></div>
+      </div>
+      <div class="field" id="f-url">
+        <label for="item-url">Link</label>
+        <input id="item-url" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=…">
+        <span class="hint" id="url-hint">Cole o endereço do vídeo, da música, do jogo ou do site.</span>
+        <span class="err" hidden></span>
+      </div>
+      <div class="field" id="f-file">
+        <span class="lbl">Ou envie um arquivo (PDF ou livro digital)</span>
+        <div class="file-row file-pick">
+          <input id="item-file" class="sr" type="file" accept=".pdf,.epub,application/pdf,application/epub+zip">
+          <label for="item-file" class="btn sm">Escolher arquivo</label>
+          <span id="item-file-current" class="file-name">Nenhum arquivo escolhido</span>
+          <button class="btn ghost sm" id="item-file-remove" type="button" hidden>Remover arquivo</button>
+        </div>
+        <span class="hint">Até 25 MB. O arquivo fica salvo neste navegador.</span>
+        <span class="err" hidden></span>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="item-hub">Matéria</label>
+          <select id="item-hub"></select>
+        </div>
+        <div class="field">
+          <label for="item-folder">Pasta</label>
+          <select id="item-folder"></select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl" id="lbl-goals">Objetivos pedagógicos</span>
+        <div class="goal-pick" id="item-goals" role="group" aria-labelledby="lbl-goals"></div>
+        <div class="file-row">
+          <label for="item-newgoal" class="sr">Novo objetivo</label>
+          <input id="item-newgoal" type="text" maxlength="40" placeholder="Outro objetivo…" style="flex:1;min-width:0;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px">
+          <button class="btn sm" id="item-addgoal" type="button">Adicionar</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="item-tags">Temas</label>
+        <input id="item-tags" type="text" maxlength="200" placeholder="Ex.: animais, fazenda, sons">
+        <span class="hint">Separe por vírgula. Os temas ajudam na busca.</span>
+      </div>
+      <div class="field">
+        <label for="item-notes">Como usar em aula</label>
+        <textarea id="item-notes" maxlength="1000" placeholder="Ex.: usar na roda de conversa, antes da atividade de desenho."></textarea>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn danger spacer" id="item-delete" type="button" hidden>Excluir material</button>
+      <button class="btn ghost" type="button" data-close>Cancelar</button>
+      <button class="btn primary" type="submit" id="item-submit">Salvar material</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Matéria -->
+<dialog id="dlg-hub" aria-labelledby="dlg-hub-title">
+  <form id="form-hub" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-hub-title">Nova matéria</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="field" id="f-hubname">
+        <label for="hub-name">Nome da matéria</label>
+        <input id="hub-name" type="text" maxlength="40" placeholder="Ex.: Linguagem e Letramento">
+        <span class="err" hidden></span>
+      </div>
+      <div class="field">
+        <span class="lbl" id="lbl-color">Cor da lombada</span>
+        <div class="swatches" id="hub-colors" role="radiogroup" aria-labelledby="lbl-color"></div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn danger spacer" id="hub-delete" type="button" hidden>Excluir matéria</button>
+      <button class="btn ghost" type="button" data-close>Cancelar</button>
+      <button class="btn primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Pasta -->
+<dialog id="dlg-folder" aria-labelledby="dlg-folder-title">
+  <form id="form-folder" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-folder-title">Nova pasta</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="field" id="f-foldername">
+        <label for="folder-name">Nome da pasta</label>
+        <input id="folder-name" type="text" maxlength="40" placeholder="Ex.: Datas comemorativas">
+        <span class="err" hidden></span>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn danger spacer" id="folder-delete" type="button" hidden>Excluir pasta</button>
+      <button class="btn ghost" type="button" data-close>Cancelar</button>
+      <button class="btn primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Confirmação -->
+<dialog id="dlg-confirm" aria-labelledby="dlg-confirm-title">
+  <form id="form-confirm" novalidate>
+    <div class="dlg-head"><h2 id="dlg-confirm-title">Confirmar</h2></div>
+    <div class="dlg-body"><p id="confirm-body"></p></div>
+    <div class="dlg-foot">
+      <button class="btn ghost" type="button" id="confirm-cancel">Cancelar</button>
+      <button class="btn primary" type="submit" id="confirm-ok">Confirmar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Compartilhar e backup -->
+<dialog id="dlg-backup" aria-labelledby="dlg-backup-title">
+  <form id="form-backup" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-backup-title">Compartilhar e backup</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <p>A estante fica salva só neste navegador. Para compartilhar com outra professora, com os especialistas ou com a coordenação, gere um arquivo e envie por e-mail ou WhatsApp.</p>
+      <div class="field">
+        <label for="export-scope">O que enviar</label>
+        <select id="export-scope"></select>
+        <div class="file-row">
+          <button class="btn primary sm" type="button" id="backup-export"><svg class="i"><use href="#i-save"/></svg>Baixar arquivo (.json)</button>
+          <button class="btn sm" type="button" id="backup-copy">Copiar como texto</button>
+        </div>
+      </div>
+      <hr class="sep">
+      <div class="field" id="f-import">
+        <span class="lbl">Abrir um arquivo recebido</span>
+        <div class="file-row file-pick">
+          <input id="backup-file" class="sr" type="file" accept=".json,application/json">
+          <label for="backup-file" class="btn sm">Escolher arquivo</label>
+          <span id="backup-file-name" class="file-name">Nenhum arquivo escolhido</span>
+        </div>
+        <label for="backup-text" class="hint">Ou cole aqui o texto recebido:</label>
+        <textarea id="backup-text" class="mono" spellcheck="false" placeholder='{"app":"estante-ludica", …}'></textarea>
+        <span class="err" hidden></span>
+      </div>
+      <div class="field">
+        <span class="lbl" id="lbl-import-mode">Como abrir</span>
+        <div class="mode-pick" role="radiogroup" aria-labelledby="lbl-import-mode">
+          <label><input type="radio" name="import-mode" id="import-merge" value="merge" checked>
+            <span><strong>Adicionar à minha estante</strong><small>Para materiais recebidos de outra pessoa. Nada do que você já tem é apagado, e materiais repetidos são ignorados.</small></span></label>
+          <label><input type="radio" name="import-mode" id="import-replace" value="replace">
+            <span><strong>Substituir toda a estante</strong><small>Para restaurar o seu próprio backup, por exemplo em outro computador.</small></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn ghost" type="button" data-close>Fechar</button>
+      <button class="btn primary" type="submit">Abrir arquivo</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+   * Constantes
+   * ===================================================================== */
+  var TYPES = [
+    { id: 'video', label: 'Vídeo', icon: 'play' },
+    { id: 'musica', label: 'Música', icon: 'music' },
+    { id: 'pdf', label: 'PDF', icon: 'doc' },
+    { id: 'livro', label: 'Livro', icon: 'book' },
+    { id: 'jogo', label: 'Jogo', icon: 'dice' },
+    { id: 'link', label: 'Link', icon: 'link' }
+  ];
+  var TYPE = {};
+  TYPES.forEach(function (t) { TYPE[t.id] = t; });
+  var FILE_TYPES = ['pdf', 'livro'];
+  var HUB_COLORS = ['#E0663A', '#2F80B7', '#5A9A35', '#B5489A', '#C99312', '#6C5BC4', '#16958B', '#C94A5B'];
+  var DEFAULT_GOALS = [
+    'Coordenação motora', 'Linguagem oral', 'Consciência fonológica', 'Contagem e números',
+    'Cores e formas', 'Escuta e atenção', 'Expressão corporal', 'Socialização',
+    'Criatividade', 'Vocabulário em inglês'
+  ];
+  var MAX_FILE = 25 * 1024 * 1024;
+  var SCHEMA = 1;
+
+  /* =====================================================================
+   * Funções puras (expostas em window.EstanteLib para testes)
+   * ===================================================================== */
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function norm(s) {
+    return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+  function cleanText(s, max) {
+    return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max || 200);
+  }
+  /** Normaliza um link digitado: aceita "youtube.com/..." sem protocolo; só http(s). Retorna '' se inválido. */
+  function normalizeUrl(raw) {
+    var u = String(raw == null ? '' : raw).trim();
+    if (!u) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+    try {
+      var x = new URL(u);
+      if (x.protocol !== 'http:' && x.protocol !== 'https:') return '';
+      if (!x.hostname || x.hostname.indexOf('.') === -1) return '';
+      return x.href;
+    } catch (e) { return ''; }
+  }
+  function youtubeId(url) {
+    try {
+      var x = new URL(url);
+      var h = x.hostname.replace(/^(www|m|music)\./, '');
+      var id = null;
+      if (h === 'youtu.be') id = x.pathname.slice(1).split('/')[0];
+      else if (h === 'youtube.com' || h === 'youtube-nocookie.com') {
+        if (x.pathname === '/watch') id = x.searchParams.get('v');
+        else {
+          var m = x.pathname.match(/^\/(shorts|embed|live|v)\/([^/?#]+)/);
+          if (m) id = m[2];
+        }
+      }
+      return id && /^[\w-]{6,20}$/.test(id) ? id : null;
+    } catch (e) { return null; }
+  }
+  /** Sugere o tipo a partir do link (o usuário sempre pode trocar). */
+  function guessType(url) {
+    var x;
+    try { x = new URL(url); } catch (e) { return null; }
+    var h = x.hostname.replace(/^www\./, '');
+    var p = x.pathname.toLowerCase();
+    if (/\.pdf$/.test(p)) return 'pdf';
+    if (/\.epub$/.test(p)) return 'livro';
+    if (/(^|\.)music\.youtube\.com$|(^|\.)spotify\.com$|(^|\.)deezer\.com$|(^|\.)soundcloud\.com$|(^|\.)music\.apple\.com$/.test(x.hostname)) return 'musica';
+    if (/(^|\.)youtube\.com$|^youtu\.be$|(^|\.)vimeo\.com$/.test(h)) return 'video';
+    if (/(^|\.)wordwall\.net$|(^|\.)educaplay\.com$|(^|\.)kahoot\.it$|(^|\.)kahoot\.com$|(^|\.)learningapps\.org$|(^|\.)escolagames\.com\.br$/.test(h)) return 'jogo';
+    if (/(^|\.)books\.google\.|(^|\.)dominiopublico\.gov\.br$/.test(h)) return 'livro';
+    return null;
+  }
+  function parseTags(text) {
+    var seen = {};
+    var out = [];
+    String(text == null ? '' : text).split(/[,;\n]/).forEach(function (t) {
+      var v = cleanText(t.replace(/^#/, ''), 30).toLowerCase();
+      if (v && !seen[norm(v)]) { seen[norm(v)] = 1; out.push(v); }
+    });
+    return out.slice(0, 15);
+  }
+  function formatSize(bytes) {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB';
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+
+  /**
+   * Valida os dados de um material.
+   * data: { title, type, url, hasFile, hubId, folderId }
+   * Retorna { ok, errors: { title?, url?, file? }, value }
+   */
+  function validateItem(state, data) {
+    var errors = {};
+    var title = cleanText(data.title, 140);
+    if (!title) errors.title = 'Dê um título ao material.';
+    var type = TYPE[data.type] ? data.type : 'link';
+    var rawUrl = String(data.url == null ? '' : data.url).trim();
+    var url = normalizeUrl(rawUrl);
+    if (rawUrl && !url) errors.url = 'Este link não parece válido. Confira se copiou o endereço completo.';
+    var isFileType = FILE_TYPES.indexOf(type) !== -1;
+    if (!isFileType && !rawUrl) errors.url = 'Cole o link do material.';
+    if (isFileType && !rawUrl && !data.hasFile) errors.file = 'Envie o arquivo ou cole um link.';
+    if (data.fileSize > MAX_FILE) errors.file = 'O arquivo tem ' + formatSize(data.fileSize) + '. O limite é 25 MB.';
+    var hub = state.hubs.find(function (h) { return h.id === data.hubId; });
+    if (!hub) errors.hub = 'Escolha uma matéria.';
+    var folderId = data.folderId || null;
+    if (folderId && !state.folders.some(function (f) { return f.id === folderId && f.hubId === data.hubId; })) folderId = null;
+    return {
+      ok: Object.keys(errors).length === 0,
+      errors: errors,
+      value: { title: title, type: type, url: url, hubId: data.hubId, folderId: folderId }
+    };
+  }
+
+  /**
+   * Filtra e ordena materiais.
+   * v: { mode: 'hub'|'fav'|'week', hubId, folderId, q, type, goal }
+   * Com texto de busca no modo 'hub', procura em todas as matérias.
+   */
+  function filterItems(state, v) {
+    var q = norm(v.q || '').trim();
+    var tokens = q ? q.split(/\s+/) : [];
+    var hubName = {}, folderName = {};
+    state.hubs.forEach(function (h) { hubName[h.id] = h.name; });
+    state.folders.forEach(function (f) { folderName[f.id] = f.name; });
+    return state.items.filter(function (it) {
+      if (v.mode === 'hub' && !tokens.length) {
+        if (it.hubId !== v.hubId) return false;
+        if (v.folderId && it.folderId !== v.folderId) return false;
+      }
+      if (v.mode === 'fav' && !it.fav) return false;
+      if (v.mode === 'week' && !it.week) return false;
+      if (v.type && it.type !== v.type) return false;
+      if (v.goal && (it.goals || []).indexOf(v.goal) === -1) return false;
+      if (tokens.length) {
+        var hay = norm([
+          it.title, it.notes, (it.tags || []).join(' '), (it.goals || []).join(' '),
+          TYPE[it.type] ? TYPE[it.type].label : '', hubName[it.hubId], folderName[it.folderId], it.fileName
+        ].join(' '));
+        for (var i = 0; i < tokens.length; i++) if (hay.indexOf(tokens[i]) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) {
+      return (b.updated || 0) - (a.updated || 0) || String(a.title).localeCompare(String(b.title), 'pt-BR');
+    });
+  }
+
+  /** Remove uma matéria e tudo que está nela. Retorna ids de arquivos a apagar. */
+  function removeHub(state, hubId) {
+    var fileIds = state.items.filter(function (i) { return i.hubId === hubId && i.fileId; }).map(function (i) { return i.fileId; });
+    state.items = state.items.filter(function (i) { return i.hubId !== hubId; });
+    state.folders = state.folders.filter(function (f) { return f.hubId !== hubId; });
+    state.hubs = state.hubs.filter(function (h) { return h.id !== hubId; });
+    return fileIds;
+  }
+  /** Remove uma pasta; os materiais continuam na matéria, sem pasta. */
+  function removeFolder(state, folderId) {
+    var moved = 0;
+    state.items.forEach(function (i) { if (i.folderId === folderId) { i.folderId = null; moved++; } });
+    state.folders = state.folders.filter(function (f) { return f.id !== folderId; });
+    return moved;
+  }
+
+  function emptyState() {
+    return { app: 'estante-ludica', schema: SCHEMA, hubs: [], folders: [], items: [], goals: DEFAULT_GOALS.slice() };
+  }
+
+  /** Valida e higieniza um backup importado. Lança Error com mensagem para o usuário. */
+  function sanitizeImport(obj, opts) {
+    opts = opts || {};
+    if (!obj || typeof obj !== 'object' || obj.app !== 'estante-ludica') {
+      throw new Error('Este arquivo não é um backup da Estante Lúdica.');
+    }
+    if (!Array.isArray(obj.hubs) || !Array.isArray(obj.items)) throw new Error('O backup está incompleto.');
+    var s = emptyState();
+    var hubIds = {}, folderIds = {};
+    obj.hubs.forEach(function (h) {
+      if (!h || typeof h.id !== 'string' || hubIds[h.id]) return;
+      var name = cleanText(h.name, 40);
+      if (!name) return;
+      hubIds[h.id] = 1;
+      s.hubs.push({ id: h.id, name: name, color: /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : HUB_COLORS[s.hubs.length % HUB_COLORS.length] });
+    });
+    (Array.isArray(obj.folders) ? obj.folders : []).forEach(function (f) {
+      if (!f || typeof f.id !== 'string' || folderIds[f.id] || !hubIds[f.hubId]) return;
+      var name = cleanText(f.name, 40);
+      if (!name) return;
+      folderIds[f.id] = f.hubId;
+      s.folders.push({ id: f.id, hubId: f.hubId, name: name });
+    });
+    var files = {};
+    var embedded = obj.files && typeof obj.files === 'object' ? obj.files : {};
+    obj.items.forEach(function (it) {
+      if (!it || typeof it.id !== 'string' || !hubIds[it.hubId]) return;
+      var title = cleanText(it.title, 140);
+      if (!title) return;
+      var item = {
+        id: it.id, hubId: it.hubId,
+        folderId: folderIds[it.folderId] === it.hubId ? it.folderId : null,
+        type: TYPE[it.type] ? it.type : 'link',
+        title: title,
+        url: normalizeUrl(it.url),
+        notes: String(it.notes == null ? '' : it.notes).slice(0, 1000),
+        tags: parseTags((Array.isArray(it.tags) ? it.tags : []).join(',')),
+        goals: (Array.isArray(it.goals) ? it.goals : []).map(function (g) { return cleanText(g, 40); }).filter(Boolean).slice(0, 12),
+        fav: !!it.fav, week: !!it.week, example: !!it.example,
+        created: Number(it.created) || Date.now(), updated: Number(it.updated) || Date.now(),
+        fileId: null, fileName: '', fileSize: 0, fileMime: ''
+      };
+      if (it.fileId && typeof embedded[it.fileId] === 'string' && /^data:[\w/+.-]+;base64,/.test(embedded[it.fileId])) {
+        item.fileId = it.fileId;
+        item.fileName = cleanText(it.fileName, 120) || 'arquivo';
+        item.fileSize = Number(it.fileSize) || 0;
+        item.fileMime = cleanText(it.fileMime, 80);
+        files[it.fileId] = embedded[it.fileId];
+      } else if (opts.keepFileRefs && typeof it.fileId === 'string' && it.fileId) {
+        // Estado salvo no próprio navegador: o arquivo está no IndexedDB, não embutido.
+        item.fileId = it.fileId;
+        item.fileName = cleanText(it.fileName, 120) || 'arquivo';
+        item.fileSize = Number(it.fileSize) || 0;
+        item.fileMime = cleanText(it.fileMime, 80);
+      }
+      if (!item.url && !item.fileId) return;
+      s.items.push(item);
+    });
+    var goals = {};
+    s.goals = [];
+    (Array.isArray(obj.goals) ? obj.goals : DEFAULT_GOALS).concat(
+      [].concat.apply([], s.items.map(function (i) { return i.goals; }))
+    ).forEach(function (g) {
+      var v = cleanText(g, 40);
+      if (v && !goals[norm(v)]) { goals[norm(v)] = 1; s.goals.push(v); }
+    });
+    if (!s.hubs.length) throw new Error('O backup não tem nenhuma matéria.');
+    return { state: s, files: files };
+  }
+
+  function seedState() {
+    var s = emptyState();
+    var hubs = [
+      ['Linguagem e Letramento', 0], ['Matemática', 1], ['Natureza e Sociedade', 2], ['Artes', 3],
+      ['Música', 4], ['Psicomotricidade', 5], ['Inglês', 6]
+    ];
+    var H = {};
+    hubs.forEach(function (h) { var id = uid(); H[h[0]] = id; s.hubs.push({ id: id, name: h[0], color: HUB_COLORS[h[1]] }); });
+    var F = {};
+    [['Linguagem e Letramento', 'Histórias'], ['Linguagem e Letramento', 'Alfabeto'], ['Matemática', 'Números até 10'],
+     ['Matemática', 'Formas'], ['Natureza e Sociedade', 'Animais'], ['Música', 'Cantigas de roda'], ['Inglês', 'Colors']
+    ].forEach(function (f) { var id = uid(); F[f[1]] = id; s.folders.push({ id: id, hubId: H[f[0]], name: f[1] }); });
+    var yt = function (q) { return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q); };
+    var t0 = Date.now();
+    var items = [
+      ['Matemática', 'Números até 10', 'video', 'Contagem de 1 a 10 com os dedos', yt('contagem 1 a 10 educação infantil'),
+        'Abrir a roda com a contagem e pedir para as crianças mostrarem os números com as mãos.', ['números', 'mãos'], ['Contagem e números', 'Coordenação motora'], true, true],
+      ['Música', 'Cantigas de roda', 'musica', 'Cantigas de roda tradicionais', yt('cantigas de roda infantil'),
+        'Para o pátio ou o início da tarde. Alternar roda grande e roda pequena.', ['folclore', 'roda'], ['Expressão corporal', 'Socialização'], false, true],
+      ['Natureza e Sociedade', 'Animais', 'video', 'Sons dos animais da fazenda', yt('sons dos animais da fazenda para crianças'),
+        'Pausar antes de cada animal aparecer e pedir para a turma adivinhar pelo som.', ['animais', 'fazenda', 'sons'], ['Escuta e atenção', 'Linguagem oral'], true, false],
+      ['Linguagem e Letramento', 'Histórias', 'video', 'A Casa Sonolenta (vídeo da história)', yt('a casa sonolenta história infantil'),
+        'Livro de Audrey Wood. Bom para trabalhar sequência e repetição; depois, recontar com fantoches.', ['sono', 'sequência', 'reconto'], ['Linguagem oral', 'Escuta e atenção'], false, false],
+      ['Matemática', 'Formas', 'jogo', 'Jogo de formas geométricas', 'https://www.google.com/search?q=' + encodeURIComponent('jogo formas geométricas educação infantil'),
+        'Projetar na lousa e chamar as crianças em duplas.', ['formas', 'círculo', 'quadrado', 'triângulo'], ['Cores e formas'], false, false],
+      ['Psicomotricidade', null, 'video', 'Circuito motor com bambolês', yt('circuito psicomotor bambolê educação infantil'),
+        'Ideias de circuito para a quadra. Ajustar a altura dos obstáculos à turma.', ['circuito', 'bambolê', 'equilíbrio'], ['Coordenação motora', 'Expressão corporal'], false, false],
+      ['Artes', null, 'video', 'Misturando cores primárias com guache', yt('misturando cores primárias guache crianças'),
+        'Fazer antes da pintura livre. Separar potes com as três cores.', ['tinta', 'cores primárias'], ['Cores e formas', 'Criatividade'], false, false],
+      ['Inglês', 'Colors', 'musica', 'The Colors Song', yt('colors song for kids'),
+        'Mostrar objetos da sala de cada cor durante a música.', ['colors', 'cores'], ['Vocabulário em inglês', 'Cores e formas'], true, true],
+      ['Inglês', null, 'musica', 'Head, Shoulders, Knees and Toes', yt('head shoulders knees and toes'),
+        'Repetir acelerando o ritmo a cada rodada.', ['corpo', 'body'], ['Vocabulário em inglês', 'Expressão corporal'], false, false]
+    ];
+    items.forEach(function (d, i) {
+      s.items.push({
+        id: uid(), hubId: H[d[0]], folderId: d[1] ? F[d[1]] : null, type: d[2], title: d[3], url: d[4], notes: d[5],
+        tags: d[6], goals: d[7], fav: d[8], week: d[9], example: true,
+        created: t0 - i * 60000, updated: t0 - i * 60000, fileId: null, fileName: '', fileSize: 0, fileMime: ''
+      });
+    });
+    return s;
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+      r.readAsDataURL(blob);
+    });
+  }
+  function dataUrlToBlob(dataUrl) {
+    var m = /^data:([\w/+.-]+);base64,(.*)$/.exec(dataUrl);
+    if (!m) throw new Error('Arquivo inválido no backup.');
+    var bin = atob(m[2]);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: m[1] });
+  }
+
+  var SITES = [
+    [/(^|\.)youtube\.com$|^youtu\.be$|(^|\.)youtube-nocookie\.com$/, 'YouTube'],
+    [/(^|\.)spotify\.com$/, 'Spotify'], [/(^|\.)deezer\.com$/, 'Deezer'], [/(^|\.)soundcloud\.com$/, 'SoundCloud'],
+    [/(^|\.)vimeo\.com$/, 'Vimeo'], [/(^|\.)wordwall\.net$/, 'Wordwall'], [/(^|\.)kahoot\.(it|com)$/, 'Kahoot'],
+    [/^drive\.google\.com$|^docs\.google\.com$/, 'Google Drive'], [/(^|\.)google\.[a-z.]+$/, 'Google'],
+    [/(^|\.)canva\.com$/, 'Canva'], [/(^|\.)instagram\.com$/, 'Instagram']
+  ];
+  /** Nome do site de destino de um link, para o botão dizer aonde ele leva. */
+  function siteName(url) {
+    try {
+      var h = new URL(url).hostname.replace(/^www\./, '');
+      for (var i = 0; i < SITES.length; i++) if (SITES[i][0].test(h)) return { name: SITES[i][1], known: true };
+      return { name: h, known: false };
+    } catch (e) { return { name: '', known: false }; }
+  }
+  function openLabel(url) {
+    var s = siteName(url);
+    if (!s.name) return 'Abrir';
+    return s.known ? 'Abrir no ' + s.name : 'Abrir em ' + s.name;
+  }
+
+  /** Copia uma estante (ou só uma matéria) para envio. */
+  function pickForExport(state, hubId) {
+    var data = JSON.parse(JSON.stringify(state));
+    if (hubId) {
+      data.hubs = data.hubs.filter(function (h) { return h.id === hubId; });
+      data.folders = data.folders.filter(function (f) { return f.hubId === hubId; });
+      data.items = data.items.filter(function (i) { return i.hubId === hubId; });
+    }
+    return data;
+  }
+
+  /**
+   * Junta um arquivo recebido (já higienizado por sanitizeImport) à estante atual, sem apagar nada.
+   * Matérias e pastas com o mesmo nome são reaproveitadas; materiais repetidos são ignorados.
+   * Retorna { state, files: {novoId: dataUrl}, added, skipped, hubsAdded }.
+   */
+  function mergeImport(state, incoming) {
+    var s = JSON.parse(JSON.stringify(state));
+    var files = {}, hubMap = {}, folderMap = {};
+    var added = 0, skipped = 0, hubsAdded = 0;
+    incoming.state.hubs.forEach(function (h) {
+      var ex = s.hubs.find(function (x) { return norm(x.name) === norm(h.name); });
+      if (ex) hubMap[h.id] = ex.id;
+      else { var id = uid(); s.hubs.push({ id: id, name: h.name, color: h.color }); hubMap[h.id] = id; hubsAdded++; }
+    });
+    incoming.state.folders.forEach(function (f) {
+      var hid = hubMap[f.hubId];
+      var ex = s.folders.find(function (x) { return x.hubId === hid && norm(x.name) === norm(f.name); });
+      if (ex) folderMap[f.id] = ex.id;
+      else { var id = uid(); s.folders.push({ id: id, hubId: hid, name: f.name }); folderMap[f.id] = id; }
+    });
+    var key = function (hid, it) { return hid + '|' + norm(it.title) + '|' + (it.url || '') + '|' + (it.fileName || '') + '|' + (it.fileSize || 0); };
+    var seen = {};
+    s.items.forEach(function (it) { seen[key(it.hubId, it)] = 1; });
+    incoming.state.items.forEach(function (it) {
+      var hid = hubMap[it.hubId];
+      var k = key(hid, it);
+      if (seen[k]) { skipped++; return; }
+      seen[k] = 1;
+      var n = JSON.parse(JSON.stringify(it));
+      n.id = uid(); n.hubId = hid; n.folderId = it.folderId ? (folderMap[it.folderId] || null) : null;
+      n.fav = false; n.week = false; n.updated = Date.now();
+      if (it.fileId) {
+        var nf = uid();
+        files[nf] = incoming.files[it.fileId];
+        n.fileId = nf;
+      }
+      s.items.push(n);
+      added++;
+    });
+    var g = {};
+    s.goals.forEach(function (x) { g[norm(x)] = 1; });
+    incoming.state.goals.forEach(function (x) { if (!g[norm(x)]) { g[norm(x)] = 1; s.goals.push(x); } });
+    return { state: s, files: files, added: added, skipped: skipped, hubsAdded: hubsAdded };
+  }
+
+  /** Ajustes em estantes salvas por versões anteriores. Retorna true se algo mudou. */
+  function migrateState(s) {
+    var changed = false;
+    s.items.forEach(function (it) {
+      // Exemplo antigo marcado como "livro" que abria um vídeo do YouTube
+      if (it.example && it.type === 'livro' && it.url && youtubeId(it.url) === null && /youtube\.com\/results/.test(it.url)) {
+        it.type = 'video';
+        if (it.title === 'A Casa Sonolenta (leitura em voz alta)') it.title = 'A Casa Sonolenta (vídeo da história)';
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  window.EstanteLib = {
+    normalizeUrl: normalizeUrl, youtubeId: youtubeId, guessType: guessType, parseTags: parseTags, norm: norm, esc: esc,
+    validateItem: validateItem, filterItems: filterItems, removeHub: removeHub, removeFolder: removeFolder,
+    sanitizeImport: sanitizeImport, seedState: seedState, mergeImport: mergeImport, pickForExport: pickForExport,
+    siteName: siteName, openLabel: openLabel, migrateState: migrateState, emptyState: emptyState, formatSize: formatSize, MAX_FILE: MAX_FILE
+  };
+
+  /* =====================================================================
+   * Armazenamento (IndexedDB, com memória como reserva)
+   * ===================================================================== */
+  var Store = {
+    db: null,
+    mem: { state: null, files: {} },
+    open: function () {
+      var self = this;
+      return new Promise(function (res) {
+        try {
+          if (!window.indexedDB) return res(false);
+          var req = indexedDB.open('estante-ludica', 1);
+          req.onupgradeneeded = function () {
+            var d = req.result;
+            if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+            if (!d.objectStoreNames.contains('files')) d.createObjectStore('files');
+          };
+          req.onsuccess = function () { self.db = req.result; res(true); };
+          req.onerror = function () { res(false); };
+          req.onblocked = function () { res(false); };
+        } catch (e) { res(false); }
+      });
+    },
+    _tx: function (store, mode, fn) {
+      var self = this;
+      return new Promise(function (res, rej) {
+        try {
+          var t = self.db.transaction(store, mode);
+          var r = fn(t.objectStore(store));
+          t.oncomplete = function () { res(r ? r.result : undefined); };
+          t.onerror = function () { rej(t.error); };
+          t.onabort = function () { rej(t.error || new Error('abort')); };
+        } catch (e) { rej(e); }
+      });
+    },
+    getState: function () {
+      if (!this.db) return Promise.resolve(this.mem.state);
+      return this._tx('kv', 'readonly', function (s) { return s.get('state'); });
+    },
+    setState: function (state) {
+      var copy = JSON.parse(JSON.stringify(state));
+      if (!this.db) { this.mem.state = copy; return Promise.resolve(); }
+      return this._tx('kv', 'readwrite', function (s) { return s.put(copy, 'state'); });
+    },
+    getFile: function (id) {
+      if (!this.db) return Promise.resolve(this.mem.files[id]);
+      return this._tx('files', 'readonly', function (s) { return s.get(id); });
+    },
+    putFile: function (id, blob) {
+      if (!this.db) { this.mem.files[id] = blob; return Promise.resolve(); }
+      return this._tx('files', 'readwrite', function (s) { return s.put(blob, id); });
+    },
+    delFile: function (id) {
+      if (!this.db) { delete this.mem.files[id]; return Promise.resolve(); }
+      return this._tx('files', 'readwrite', function (s) { return s.delete(id); });
+    },
+    clearFiles: function () {
+      if (!this.db) { this.mem.files = {}; return Promise.resolve(); }
+      return this._tx('files', 'readwrite', function (s) { return s.clear(); });
+    }
+  };
+
+  /* =====================================================================
+   * Estado da interface
+   * ===================================================================== */
+  var S = emptyState();
+  var V = { mode: 'hub', hubId: null, folderId: null, q: '', type: '', goal: '' };
+  var persistent = false;
+  var saveTimer = null;
+  var saveStatus = 'Tudo salvo';
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var icon = function (name, extra) { return '<svg class="i' + (extra ? ' ' + extra : '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>'; };
+  var hubById = function (id) { return S.hubs.find(function (h) { return h.id === id; }); };
+  var folderById = function (id) { return S.folders.find(function (f) { return f.id === id; }); };
+
+  function save() {
+    clearTimeout(saveTimer);
+    saveStatus = 'Salvando…';
+    updateSaveState();
+    saveTimer = setTimeout(function () {
+      Store.setState(S).then(function () {
+        saveStatus = persistent ? 'Tudo salvo neste navegador' : 'Salvo só até fechar a página';
+        updateSaveState();
+      }).catch(function () {
+        saveStatus = 'Não foi possível salvar. Faça um backup.';
+        updateSaveState(true);
+      });
+    }, 200);
+  }
+  function updateSaveState(err) {
+    var el = $('#save-state');
+    if (!el) return;
+    el.textContent = saveStatus;
+    el.classList.toggle('warn', !!err || !persistent);
+  }
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+  function touch(item) { item.updated = Date.now(); }
+
+  /* =====================================================================
+   * Renderização
+   * ===================================================================== */
+  function render() {
+    if (V.mode === 'hub' && !hubById(V.hubId)) V.hubId = S.hubs[0] ? S.hubs[0].id : null;
+    if (V.folderId && !folderById(V.folderId)) V.folderId = null;
+    if (V.goal && S.goals.indexOf(V.goal) === -1) V.goal = '';
+    renderShelf();
+    renderView();
+  }
+
+  function renderShelf() {
+    var counts = {};
+    S.items.forEach(function (i) { counts[i.hubId] = (counts[i.hubId] || 0) + 1; });
+    var favN = S.items.filter(function (i) { return i.fav; }).length;
+    var weekN = S.items.filter(function (i) { return i.week; }).length;
+    var hubs = S.hubs.map(function (h) {
+      var cur = V.mode === 'hub' && V.hubId === h.id && !V.q;
+      return '<li><button class="hub-btn" type="button" data-action="hub" data-id="' + esc(h.id) + '" style="--hub:' + esc(h.color) + '" aria-current="' + cur + '">' +
+        '<span class="spine" aria-hidden="true">' + esc(h.name.charAt(0).toUpperCase()) + '</span>' +
+        '<span class="hub-name">' + esc(h.name) + '</span><span class="count">' + (counts[h.id] || 0) + '</span></button></li>';
+    }).join('');
+    $('#shelf').innerHTML =
+      '<div class="brand"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>' +
+        '<div><h1>Estante Lúdica</h1><small>Biblioteca de atividades da turma</small></div></div>' +
+      '<div class="shelf-section quick"><p class="shelf-label">Planejamento</p><ul class="quick-list">' +
+        '<li><button class="hub-btn" type="button" data-action="mode" data-mode="week" aria-current="' + (V.mode === 'week') + '">' +
+          '<span class="spine" aria-hidden="true">' + icon('cal') + '</span><span class="hub-name">Aula da semana</span><span class="count">' + weekN + '</span></button></li>' +
+        '<li><button class="hub-btn" type="button" data-action="mode" data-mode="fav" aria-current="' + (V.mode === 'fav') + '">' +
+          '<span class="spine sun" aria-hidden="true">' + icon('star') + '</span><span class="hub-name">Favoritos</span><span class="count">' + favN + '</span></button></li>' +
+      '</ul></div>' +
+      '<div class="shelf-section"><p class="shelf-label">Matérias</p><div class="hub-list-wrap"><ul class="hub-list">' + hubs + '</ul>' +
+        '<button class="add-hub" type="button" data-action="new-hub" aria-label="Nova matéria">' + icon('plus') + '<span class="add-hub-lbl">Nova matéria</span></button></div></div>' +
+      '<div class="shelf-foot">' +
+        '<span class="save-state" id="save-state"></span>' +
+        '<div class="row"><button class="btn sm" type="button" data-action="backup">' + icon('save') + 'Compartilhar e backup</button></div>' +
+        '<span>Nenhum dado de alunos é registrado aqui.</span>' +
+      '</div>';
+    updateSaveState();
+  }
+
+  function cardHtml(it, showWhere) {
+    var hub = hubById(it.hubId) || { color: '#888', name: '' };
+    var folder = folderById(it.folderId);
+    var t = TYPE[it.type] || TYPE.link;
+    var yt = it.url ? youtubeId(it.url) : null;
+    var thumb = '<div class="thumb">' + icon(t.icon) +
+      (yt ? '<img class="yt" src="https://i.ytimg.com/vi/' + esc(yt) + '/mqdefault.jpg" alt="" loading="lazy">' : '') +
+      '<span class="badge">' + icon(t.icon) + esc(t.label) + '</span></div>';
+    var where = [];
+    if (showWhere) where.push(esc(hub.name));
+    if (folder) where.push(icon('folder', '') .replace('class="i"', 'class="i" style="width:12px;height:12px"') + esc(folder.name));
+    if (it.fileName) where.push(esc(it.fileName) + ' · ' + formatSize(it.fileSize));
+    if (it.example) where.push('<span class="tag-ex">Exemplo</span>');
+    var chips = (it.goals || []).map(function (g) {
+      return '<button class="chip" type="button" data-action="goal-filter" data-goal="' + esc(g) + '" title="Ver materiais com este objetivo">' + esc(g) + '</button>';
+    }).concat((it.tags || []).map(function (g) {
+      return '<button class="chip tag" type="button" data-action="tag-search" data-tag="' + esc(g) + '" title="Buscar este tema">#' + esc(g) + '</button>';
+    })).join('');
+    var open = it.fileId
+      ? '<button class="btn primary sm" type="button" data-action="open-file" data-id="' + esc(it.id) + '">' + icon('ext') + '<span class="t">Abrir arquivo</span></button>'
+      : (it.url ? '<a class="btn primary sm" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(it.url) + '">' + icon('ext') + '<span class="t">' + esc(openLabel(it.url)) + '</span></a>' : '<span></span>');
+    return '<article class="card" style="--hub:' + esc(hub.color) + '" data-item="' + esc(it.id) + '">' + thumb +
+      '<div class="card-body">' + (where.length ? '<div class="where">' + where.join('<span aria-hidden="true">›</span>') + '</div>' : '') +
+        '<h3>' + esc(it.title) + '</h3>' +
+        (it.notes ? '<p class="notes">' + esc(it.notes) + '</p>' : '') +
+        (chips ? '<div class="chips">' + chips + '</div>' : '') +
+      '</div>' +
+      '<div class="card-actions">' + open +
+        '<button class="icon-btn fav" type="button" data-action="fav" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.fav + '" aria-label="' + (it.fav ? 'Tirar dos favoritos' : 'Marcar como favorito') + '" title="Favorito">' + icon('star') + '</button>' +
+        '<button class="icon-btn week" type="button" data-action="week" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.week + '" aria-label="' + (it.week ? 'Tirar da aula da semana' : 'Usar na aula da semana') + '" title="Aula da semana">' + icon('cal') + '</button>' +
+        '<button class="icon-btn" type="button" data-action="edit" data-id="' + esc(it.id) + '" aria-label="Editar material" title="Editar">' + icon('edit') + '</button>' +
+      '</div></article>';
+  }
+
+  function renderView() {
+    var view = $('#view');
+    var searching = !!V.q.trim();
+    var hub = hubById(V.hubId);
+    var items = filterItems(S, V);
+    var html = '';
+
+    if (!S.hubs.length) {
+      view.innerHTML = '<div class="empty"><h3>Comece criando uma matéria</h3><p>Cada matéria é uma prateleira da sua estante, com pastas e materiais. Ex.: Linguagem, Matemática, Música.</p>' +
+        '<button class="btn primary" type="button" data-action="new-hub">' + icon('plus') + 'Criar matéria</button></div>';
+      return;
+    }
+
+    // Cabeçalho
+    if (searching) {
+      html += '<section class="head"><div class="head-title"><div><div class="eyebrow">Busca em todas as matérias</div>' +
+        '<h2>“' + esc(V.q.trim()) + '”</h2><p>' + plural(items.length, 'material encontrado', 'materiais encontrados') + '</p></div></div>' +
+        '<div class="head-actions"><button class="btn" type="button" data-action="clear-search">Limpar busca</button></div></section>';
+    } else if (V.mode === 'week') {
+      html += '<section class="head"><div class="head-title"><div><div class="eyebrow">Planejamento</div><h2>Aula da semana</h2>' +
+        '<p>Materiais separados para as próximas aulas. Marque com ' + '<span aria-hidden="true">o calendário</span> em qualquer cartão.</p></div></div>' +
+        '<div class="head-actions">' + (items.length ? '<button class="btn" type="button" data-action="clear-week">Começar nova semana</button>' : '') + '</div></section>';
+    } else if (V.mode === 'fav') {
+      html += '<section class="head"><div class="head-title"><div><div class="eyebrow">Planejamento</div><h2>Favoritos</h2>' +
+        '<p>Os materiais que mais funcionam com a turma.</p></div></div></section>';
+    } else {
+      var folders = S.folders.filter(function (f) { return f.hubId === hub.id; });
+      var total = S.items.filter(function (i) { return i.hubId === hub.id; }).length;
+      html += '<section class="head" style="--hub:' + esc(hub.color) + '"><div class="head-title"><span class="spine" aria-hidden="true">' + esc(hub.name.charAt(0).toUpperCase()) + '</span><div>' +
+        '<div class="eyebrow">Matéria</div><h2>' + esc(hub.name) + '</h2><p>' + plural(total, 'material', 'materiais') + ' · ' + plural(folders.length, 'pasta', 'pastas') + '</p></div></div>' +
+        '<div class="head-actions">' +
+          '<button class="btn ghost" type="button" data-action="edit-hub">' + icon('edit') + '<span class="lbl-long">Editar matéria</span></button>' +
+          '<button class="btn primary" type="button" data-action="new-item">' + icon('plus') + 'Adicionar material</button>' +
+        '</div></section>';
+      var counts = {};
+      S.items.forEach(function (i) { if (i.folderId) counts[i.folderId] = (counts[i.folderId] || 0) + 1; });
+      html += '<nav class="folders" aria-label="Pastas" style="--hub:' + esc(hub.color) + '">' +
+        '<button class="folder" type="button" data-action="folder" data-id="" aria-pressed="' + !V.folderId + '">Tudo <span class="count">' + total + '</span></button>' +
+        folders.map(function (f) {
+          return '<button class="folder" type="button" data-action="folder" data-id="' + esc(f.id) + '" aria-pressed="' + (V.folderId === f.id) + '">' + icon('folder') + esc(f.name) + ' <span class="count">' + (counts[f.id] || 0) + '</span></button>';
+        }).join('') +
+        (V.folderId ? '<button class="folder add" type="button" data-action="edit-folder">' + icon('edit') + 'Editar pasta</button>' : '') +
+        '<button class="folder add" type="button" data-action="new-folder">' + icon('plus') + 'Nova pasta</button></nav>';
+    }
+
+    // Filtros
+    html += '<div class="filters"><div class="seg" role="group" aria-label="Tipo de material">' +
+      '<button type="button" data-action="type" data-type="" aria-pressed="' + !V.type + '">Todos</button>' +
+      TYPES.map(function (t) {
+        return '<button type="button" data-action="type" data-type="' + t.id + '" aria-pressed="' + (V.type === t.id) + '">' + icon(t.icon) + t.label + '</button>';
+      }).join('') + '</div>' +
+      '<div class="goal-select"><label for="goal-filter">Objetivo</label><select id="goal-filter"><option value="">Todos</option>' +
+      S.goals.map(function (g) { return '<option' + (V.goal === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') +
+      '</select></div></div>';
+
+    if (!persistent) {
+      html += '<div class="notice err"><p>Este navegador não está permitindo salvar a estante (janela anônima ou dados bloqueados). O que você adicionar some ao fechar a página, a não ser que faça um backup.</p>' +
+        '<button class="btn sm" type="button" data-action="backup">Fazer backup</button></div>';
+    }
+    if (S.items.some(function (i) { return i.example; })) {
+      html += '<div class="notice"><p>Os materiais marcados como <strong>Exemplo</strong> mostram como a estante funciona. Quando quiser, remova todos de uma vez.</p>' +
+        '<button class="btn sm" type="button" data-action="clear-examples">Remover exemplos</button></div>';
+    }
+
+    // Lista
+    if (items.length) {
+      html += '<div class="grid">' + items.map(function (it) { return cardHtml(it, searching || V.mode !== 'hub'); }).join('') + '</div>';
+    } else {
+      var msg;
+      if (searching) msg = ['Nada encontrado', 'Tente outra palavra, ou procure por um tema ou objetivo. A busca olha títulos, temas, objetivos, pastas e anotações.', ''];
+      else if (V.type || V.goal) msg = ['Nenhum material com esses filtros', 'Volte para "Todos" ou escolha outro objetivo.', '<button class="btn" type="button" data-action="clear-filters">Limpar filtros</button>'];
+      else if (V.mode === 'week') msg = ['Nenhum material separado', 'Clique no calendário de um cartão para incluir o material na aula da semana.', ''];
+      else if (V.mode === 'fav') msg = ['Nenhum favorito ainda', 'Clique na estrela de um cartão para guardar aqui os materiais que mais funcionam.', ''];
+      else msg = [V.folderId ? 'Esta pasta está vazia' : 'Nenhum material nesta matéria', 'Adicione vídeos, músicas, PDFs, livros e jogos que você usa nas aulas.',
+        '<button class="btn primary" type="button" data-action="new-item">' + icon('plus') + 'Adicionar material</button>'];
+      html += '<div class="empty"><h3>' + msg[0] + '</h3><p>' + msg[1] + '</p>' + msg[2] + '</div>';
+    }
+    view.innerHTML = html;
+  }
+
+  /* =====================================================================
+   * Diálogos
+   * ===================================================================== */
+  function openDialog(d) { if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', ''); }
+  function closeDialog(d) { if (typeof d.close === 'function') d.close(); else d.removeAttribute('open'); }
+  function setErr(fieldId, msg) {
+    var f = $('#' + fieldId);
+    if (!f) return;
+    var e = $('.err', f);
+    if (msg) { f.setAttribute('data-invalid', ''); e.textContent = msg; e.hidden = false; }
+    else { f.removeAttribute('data-invalid'); e.textContent = ''; e.hidden = true; }
+  }
+
+  var confirmResolve = null;
+  function askConfirm(title, body, okLabel) {
+    $('#dlg-confirm-title').textContent = title;
+    $('#confirm-body').textContent = body;
+    $('#confirm-ok').textContent = okLabel || 'Confirmar';
+    openDialog($('#dlg-confirm'));
+    return new Promise(function (res) { confirmResolve = res; });
+  }
+  function finishConfirm(v) {
+    closeDialog($('#dlg-confirm'));
+    if (confirmResolve) { var r = confirmResolve; confirmResolve = null; r(v); }
+  }
+  $('#form-confirm').addEventListener('submit', function (e) { e.preventDefault(); finishConfirm(true); });
+  $('#confirm-cancel').addEventListener('click', function () { finishConfirm(false); });
+  $('#dlg-confirm').addEventListener('cancel', function (e) { e.preventDefault(); finishConfirm(false); });
+
+  // ---------- Material ----------
+  var editing = null; // { id|null, file: File|null, removeFile: bool }
+  function fillFolderSelect(hubId, selected) {
+    $('#item-folder').innerHTML = '<option value="">Sem pasta</option>' + S.folders.filter(function (f) { return f.hubId === hubId; }).map(function (f) {
+      return '<option value="' + esc(f.id) + '"' + (f.id === selected ? ' selected' : '') + '>' + esc(f.name) + '</option>';
+    }).join('');
+  }
+  function renderGoalPicker(selected) {
+    $('#item-goals').innerHTML = S.goals.map(function (g, i) {
+      return '<label><input type="checkbox" id="goal-' + i + '" value="' + esc(g) + '"' + (selected.indexOf(g) !== -1 ? ' checked' : '') + '>' + esc(g) + '</label>';
+    }).join('');
+  }
+  function currentType() { var r = $('input[name="item-type"]:checked'); return r ? r.value : 'link'; }
+  function updateFileUi() {
+    var it = editing && editing.id ? S.items.find(function (i) { return i.id === editing.id; }) : null;
+    var hasStored = it && it.fileId && !editing.removeFile;
+    var label = editing.file ? editing.file.name + ' · ' + formatSize(editing.file.size) : (hasStored ? 'Arquivo atual: ' + it.fileName : 'Nenhum arquivo escolhido');
+    $('#item-file-current').textContent = label;
+    $('#item-file-remove').hidden = !(editing.file || hasStored);
+    $('#f-file').hidden = FILE_TYPES.indexOf(currentType()) === -1 && !editing.file && !hasStored;
+    $('#url-hint').textContent = FILE_TYPES.indexOf(currentType()) !== -1
+      ? 'Cole um link ou envie o arquivo logo abaixo.'
+      : 'Cole o endereço do vídeo, da música, do jogo ou do site.';
+  }
+  function openItemDialog(id) {
+    var it = id ? S.items.find(function (i) { return i.id === id; }) : null;
+    editing = { id: it ? it.id : null, file: null, removeFile: false };
+    $('#dlg-item-title').textContent = it ? 'Editar material' : 'Adicionar material';
+    $('#item-submit').textContent = it ? 'Salvar alterações' : 'Salvar material';
+    $('#item-delete').hidden = !it;
+    $('#item-title').value = it ? it.title : '';
+    $('#item-url').value = it ? it.url : '';
+    $('#item-file').value = '';
+    $('#item-notes').value = it ? it.notes : '';
+    $('#item-tags').value = it ? (it.tags || []).join(', ') : '';
+    $('#item-newgoal').value = '';
+    var type = it ? it.type : (V.type || 'video');
+    $('#item-type').innerHTML = TYPES.map(function (t) {
+      return '<label><input type="radio" name="item-type" id="type-' + t.id + '" value="' + t.id + '"' + (t.id === type ? ' checked' : '') + '>' + icon(t.icon) + t.label + '</label>';
+    }).join('');
+    var hubId = it ? it.hubId : (V.mode === 'hub' && V.hubId ? V.hubId : S.hubs[0].id);
+    $('#item-hub').innerHTML = S.hubs.map(function (h) {
+      return '<option value="' + esc(h.id) + '"' + (h.id === hubId ? ' selected' : '') + '>' + esc(h.name) + '</option>';
+    }).join('');
+    fillFolderSelect(hubId, it ? it.folderId : (V.mode === 'hub' ? V.folderId : null));
+    renderGoalPicker(it ? it.goals || [] : (V.goal ? [V.goal] : []));
+    ['f-title', 'f-url', 'f-file'].forEach(function (f) { setErr(f, ''); });
+    updateFileUi();
+    openDialog($('#dlg-item'));
+    setTimeout(function () { $('#item-title').focus(); }, 30);
+  }
+  $('#item-hub').addEventListener('change', function () { fillFolderSelect(this.value, null); });
+  $('#item-type').addEventListener('change', updateFileUi);
+  $('#item-url').addEventListener('change', function () {
+    var u = normalizeUrl(this.value);
+    if (!u) return;
+    var g = guessType(u);
+    if (g && !editing.id) { var r = $('#type-' + g); if (r) { r.checked = true; updateFileUi(); } }
+  });
+  $('#item-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    setErr('f-file', '');
+    if (!f) return;
+    if (f.size > MAX_FILE) { setErr('f-file', 'O arquivo tem ' + formatSize(f.size) + '. O limite é 25 MB.'); this.value = ''; return; }
+    editing.file = f;
+    editing.removeFile = false;
+    var isEpub = /\.epub$/i.test(f.name) || f.type === 'application/epub+zip';
+    var r = $('#type-' + (isEpub ? 'livro' : (currentType() === 'livro' ? 'livro' : 'pdf')));
+    if (r) r.checked = true;
+    if (!$('#item-title').value.trim()) $('#item-title').value = f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+    updateFileUi();
+  });
+  $('#item-file-remove').addEventListener('click', function () {
+    editing.file = null; editing.removeFile = true; $('#item-file').value = ''; updateFileUi();
+  });
+  function addGoalFromInput() {
+    var v = cleanText($('#item-newgoal').value, 40);
+    if (!v) return;
+    var checked = $$('#item-goals input:checked').map(function (i) { return i.value; });
+    var existing = S.goals.find(function (g) { return norm(g) === norm(v); });
+    if (!existing) { S.goals.push(v); existing = v; save(); }
+    checked.push(existing);
+    renderGoalPicker(checked);
+    $('#item-newgoal').value = '';
+  }
+  $('#item-addgoal').addEventListener('click', addGoalFromInput);
+  $('#item-newgoal').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addGoalFromInput(); } });
+
+  $('#form-item').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var it = editing.id ? S.items.find(function (i) { return i.id === editing.id; }) : null;
+    var hasFile = !!editing.file || !!(it && it.fileId && !editing.removeFile);
+    var res = validateItem(S, {
+      title: $('#item-title').value, type: currentType(), url: $('#item-url').value, hasFile: hasFile,
+      fileSize: editing.file ? editing.file.size : 0, hubId: $('#item-hub').value, folderId: $('#item-folder').value
+    });
+    setErr('f-title', res.errors.title); setErr('f-url', res.errors.url); setErr('f-file', res.errors.file);
+    if (res.errors.file) $('#f-file').hidden = false;
+    if (!res.ok) {
+      var first = $('#dlg-item [data-invalid] input');
+      if (first) first.focus();
+      return;
+    }
+    var submit = $('#item-submit');
+    submit.disabled = true;
+    var isNew = !it;
+    if (!it) {
+      it = { id: uid(), created: Date.now(), fav: false, week: false, example: false, fileId: null, fileName: '', fileSize: 0, fileMime: '' };
+    }
+    var oldFileId = it.fileId;
+    var tasks = [];
+    if (editing.file) {
+      var fid = uid();
+      var f = editing.file;
+      tasks.push(Store.putFile(fid, f).then(function () {
+        it.fileId = fid; it.fileName = f.name; it.fileSize = f.size; it.fileMime = f.type || 'application/octet-stream';
+        if (oldFileId) return Store.delFile(oldFileId);
+      }));
+    } else if (editing.removeFile && oldFileId) {
+      tasks.push(Store.delFile(oldFileId).then(function () { it.fileId = null; it.fileName = ''; it.fileSize = 0; it.fileMime = ''; }));
+    }
+    Promise.all(tasks).then(function () {
+      it.title = res.value.title; it.type = res.value.type; it.url = res.value.url;
+      it.hubId = res.value.hubId; it.folderId = res.value.folderId;
+      it.notes = String($('#item-notes').value || '').trim().slice(0, 1000);
+      it.tags = parseTags($('#item-tags').value);
+      it.goals = $$('#item-goals input:checked').map(function (i) { return i.value; });
+      it.example = false;
+      touch(it);
+      if (isNew) S.items.push(it);
+      save();
+      closeDialog($('#dlg-item'));
+      if (V.mode === 'hub' && !V.q) {
+        V.hubId = it.hubId;
+        if (V.folderId && V.folderId !== it.folderId) V.folderId = it.folderId;
+      }
+      render();
+      toast(isNew ? 'Material adicionado' : 'Alterações salvas');
+    }).catch(function () {
+      setErr('f-file', 'Não foi possível guardar o arquivo neste navegador. Tente um arquivo menor ou use um link.');
+      $('#f-file').hidden = false;
+    }).then(function () { submit.disabled = false; });
+  });
+  $('#item-delete').addEventListener('click', function () {
+    var it = S.items.find(function (i) { return i.id === editing.id; });
+    if (!it) return;
+    closeDialog($('#dlg-item'));
+    askConfirm('Excluir material?', '“' + it.title + '” será removido da estante. Esta ação não pode ser desfeita.', 'Excluir').then(function (ok) {
+      if (!ok) return;
+      S.items = S.items.filter(function (i) { return i.id !== it.id; });
+      if (it.fileId) Store.delFile(it.fileId).catch(function () {});
+      save(); render(); toast('Material excluído');
+    });
+  });
+
+  // ---------- Matéria ----------
+  var editingHub = null;
+  function openHubDialog(id) {
+    var h = id ? hubById(id) : null;
+    editingHub = h ? h.id : null;
+    $('#dlg-hub-title').textContent = h ? 'Editar matéria' : 'Nova matéria';
+    $('#hub-name').value = h ? h.name : '';
+    $('#hub-delete').hidden = !h;
+    var color = h ? h.color : HUB_COLORS[S.hubs.length % HUB_COLORS.length];
+    $('#hub-colors').innerHTML = HUB_COLORS.map(function (c, i) {
+      return '<label style="--c:' + c + '" title="Cor ' + (i + 1) + '"><input type="radio" name="hub-color" id="hub-color-' + i + '" value="' + c + '"' + (c === color ? ' checked' : '') + ' aria-label="Cor ' + (i + 1) + '">' +
+        '<svg class="i" aria-hidden="true"><use href="#i-check"/></svg></label>';
+    }).join('');
+    setErr('f-hubname', '');
+    openDialog($('#dlg-hub'));
+    setTimeout(function () { $('#hub-name').focus(); }, 30);
+  }
+  $('#form-hub').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = cleanText($('#hub-name').value, 40);
+    if (!name) { setErr('f-hubname', 'Dê um nome à matéria.'); $('#hub-name').focus(); return; }
+    var dup = S.hubs.find(function (h) { return norm(h.name) === norm(name) && h.id !== editingHub; });
+    if (dup) { setErr('f-hubname', 'Já existe uma matéria com esse nome.'); $('#hub-name').focus(); return; }
+    var c = $('input[name="hub-color"]:checked');
+    var color = c ? c.value : HUB_COLORS[0];
+    if (editingHub) { var h = hubById(editingHub); h.name = name; h.color = color; toast('Matéria atualizada'); }
+    else { var nh = { id: uid(), name: name, color: color }; S.hubs.push(nh); V = { mode: 'hub', hubId: nh.id, folderId: null, q: '', type: '', goal: '' }; $('#q').value = ''; toast('Matéria criada'); }
+    save(); closeDialog($('#dlg-hub')); render();
+  });
+  $('#hub-delete').addEventListener('click', function () {
+    var h = hubById(editingHub);
+    if (!h) return;
+    var n = S.items.filter(function (i) { return i.hubId === h.id; }).length;
+    closeDialog($('#dlg-hub'));
+    askConfirm('Excluir a matéria ' + h.name + '?', n
+      ? 'As pastas e ' + plural(n, 'material', 'materiais') + ' desta matéria também serão excluídos. Faça um backup antes se quiser guardar.'
+      : 'A matéria e suas pastas serão removidas.', 'Excluir matéria').then(function (ok) {
+      if (!ok) return;
+      removeHub(S, h.id).forEach(function (fid) { Store.delFile(fid).catch(function () {}); });
+      if (V.hubId === h.id) { V.hubId = null; V.folderId = null; }
+      save(); render(); toast('Matéria excluída');
+    });
+  });
+
+  // ---------- Pasta ----------
+  var editingFolder = null;
+  function openFolderDialog(id) {
+    var f = id ? folderById(id) : null;
+    editingFolder = f ? f.id : null;
+    $('#dlg-folder-title').textContent = f ? 'Editar pasta' : 'Nova pasta em ' + hubById(V.hubId).name;
+    $('#folder-name').value = f ? f.name : '';
+    $('#folder-delete').hidden = !f;
+    setErr('f-foldername', '');
+    openDialog($('#dlg-folder'));
+    setTimeout(function () { $('#folder-name').focus(); }, 30);
+  }
+  $('#form-folder').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = cleanText($('#folder-name').value, 40);
+    if (!name) { setErr('f-foldername', 'Dê um nome à pasta.'); $('#folder-name').focus(); return; }
+    var hubId = editingFolder ? folderById(editingFolder).hubId : V.hubId;
+    var dup = S.folders.find(function (f) { return f.hubId === hubId && norm(f.name) === norm(name) && f.id !== editingFolder; });
+    if (dup) { setErr('f-foldername', 'Já existe uma pasta com esse nome nesta matéria.'); $('#folder-name').focus(); return; }
+    if (editingFolder) { folderById(editingFolder).name = name; toast('Pasta renomeada'); }
+    else { var nf = { id: uid(), hubId: hubId, name: name }; S.folders.push(nf); V.folderId = nf.id; toast('Pasta criada'); }
+    save(); closeDialog($('#dlg-folder')); render();
+  });
+  $('#folder-delete').addEventListener('click', function () {
+    var f = folderById(editingFolder);
+    if (!f) return;
+    var n = S.items.filter(function (i) { return i.folderId === f.id; }).length;
+    closeDialog($('#dlg-folder'));
+    askConfirm('Excluir a pasta ' + f.name + '?', n
+      ? plural(n, 'material continua', 'materiais continuam') + ' na matéria, apenas sem pasta.'
+      : 'A pasta está vazia e será removida.', 'Excluir pasta').then(function (ok) {
+      if (!ok) return;
+      removeFolder(S, f.id);
+      V.folderId = null;
+      save(); render(); toast('Pasta excluída');
+    });
+  });
+
+  // ---------- Backup ----------
+  function buildBackup(hubId) {
+    var files = {};
+    var data = pickForExport(S, hubId);
+    var withFiles = data.items.filter(function (i) { return i.fileId; });
+    return Promise.all(withFiles.map(function (i) {
+      return Store.getFile(i.fileId).then(function (b) { if (b) return blobToDataUrl(b).then(function (d) { files[i.fileId] = d; }); });
+    })).then(function () {
+      data.app = 'estante-ludica'; data.schema = SCHEMA; data.exportedAt = new Date().toISOString(); data.files = files;
+      return JSON.stringify(data);
+    });
+  }
+  $('#backup-export').addEventListener('click', function () {
+    var hubId = $('#export-scope').value;
+    var hub = hubById(hubId);
+    var slug = hub ? '-' + norm(hub.name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '';
+    buildBackup(hubId).then(function (json) {
+      var blob = new Blob([json], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'estante-ludica' + slug + '-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      toast('Arquivo gerado');
+    }).catch(function () { toast('Não foi possível gerar o backup'); });
+  });
+  $('#backup-copy').addEventListener('click', function () {
+    var btn = this;
+    buildBackup($('#export-scope').value).then(function (json) {
+      var fallback = function () { var t = $('#backup-text'); t.value = json; t.focus(); t.select(); toast('Texto selecionado. Copie com Ctrl+C.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(function () { toast('Texto copiado'); }, fallback);
+      } else fallback();
+    });
+    btn.blur();
+  });
+  $('#backup-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    $('#backup-file-name').textContent = f.name;
+    f.text().then(function (t) { $('#backup-text').value = t; setErr('f-import', ''); });
+  });
+  $('#form-backup').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var raw = $('#backup-text').value.trim();
+    if (!raw) { setErr('f-import', 'Escolha um arquivo ou cole o texto recebido.'); return; }
+    var parsed;
+    try { parsed = sanitizeImport(JSON.parse(raw)); }
+    catch (err) { setErr('f-import', err instanceof SyntaxError ? 'O texto colado não é um backup válido.' : err.message); return; }
+    setErr('f-import', '');
+    closeDialog($('#dlg-backup'));
+    var mode = $('input[name="import-mode"]:checked');
+    if (!mode || mode.value === 'merge') {
+      var m = mergeImport(S, parsed);
+      if (!m.added) {
+        toast(m.skipped ? 'Nada novo: todos os materiais já estavam na sua estante' : 'O arquivo não tem materiais');
+        return;
+      }
+      askConfirm('Adicionar à sua estante?', plural(m.added, 'material novo será adicionado', 'materiais novos serão adicionados') +
+        (m.hubsAdded ? ', com ' + plural(m.hubsAdded, 'matéria nova', 'matérias novas') : '') +
+        (m.skipped ? '. ' + plural(m.skipped, 'material repetido será ignorado', 'materiais repetidos serão ignorados') : '') +
+        '. Nada do que você já tem será apagado.', 'Adicionar').then(function (ok) {
+        if (!ok) return;
+        Promise.all(Object.keys(m.files).map(function (id) { return Store.putFile(id, dataUrlToBlob(m.files[id])); })).then(function () {
+          S = m.state;
+          save(); render(); toast(plural(m.added, 'material adicionado', 'materiais adicionados'));
+        }).catch(function () { toast('Não foi possível guardar os arquivos recebidos'); });
+      });
+      return;
+    }
+    askConfirm('Restaurar backup?', 'A estante atual será substituída por ' + plural(parsed.state.hubs.length, 'matéria', 'matérias') + ' e ' +
+      plural(parsed.state.items.length, 'material', 'materiais') + ' do backup.', 'Restaurar').then(function (ok) {
+      if (!ok) return;
+      Store.clearFiles().then(function () {
+        return Promise.all(Object.keys(parsed.files).map(function (id) { return Store.putFile(id, dataUrlToBlob(parsed.files[id])); }));
+      }).then(function () {
+        S = parsed.state;
+        V = { mode: 'hub', hubId: S.hubs[0].id, folderId: null, q: '', type: '', goal: '' };
+        $('#q').value = '';
+        save(); render(); toast('Backup restaurado');
+      }).catch(function () { toast('Não foi possível restaurar os arquivos do backup'); });
+    });
+  });
+
+  // Fechar diálogos
+  $$('[data-close]').forEach(function (b) { b.addEventListener('click', function () { closeDialog(b.closest('dialog')); }); });
+
+  /* =====================================================================
+   * Ações
+   * ===================================================================== */
+  function openFile(id) {
+    var it = S.items.find(function (i) { return i.id === id; });
+    if (!it || !it.fileId) return;
+    Store.getFile(it.fileId).then(function (blob) {
+      if (!blob) { toast('O arquivo não está mais neste navegador'); return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      // Sem rel="noopener": o Chrome bloqueia abrir blob: em aba sem vínculo com a página de origem.
+      // O blob é criado pela própria página (mesma origem), então não há risco de tabnabbing.
+      a.href = url; a.target = '_blank';
+      if (!/pdf/.test(blob.type || it.fileMime)) a.download = it.fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    });
+  }
+  function setSearch(q) {
+    V.q = q;
+    $('#q').value = q;
+    $('#q-clear').hidden = !q;
+    render();
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-action]');
+    if (!b) return;
+    var a = b.getAttribute('data-action');
+    var id = b.getAttribute('data-id');
+    var it = id ? S.items.find(function (i) { return i.id === id; }) : null;
+    switch (a) {
+      case 'hub': V.mode = 'hub'; V.hubId = id; V.folderId = null; V.type = ''; V.goal = ''; setSearch(''); break;
+      case 'mode': V.mode = b.getAttribute('data-mode'); V.folderId = null; setSearch(''); break;
+      case 'folder': V.folderId = id || null; render(); break;
+      case 'type': V.type = b.getAttribute('data-type'); render(); break;
+      case 'goal-filter': V.goal = b.getAttribute('data-goal'); render(); toast('Filtrando por ' + V.goal); break;
+      case 'tag-search': setSearch(b.getAttribute('data-tag')); $('#q').focus(); break;
+      case 'clear-filters': V.type = ''; V.goal = ''; render(); break;
+      case 'clear-search': setSearch(''); break;
+      case 'new-item': openItemDialog(null); break;
+      case 'edit': openItemDialog(id); break;
+      case 'new-hub': openHubDialog(null); break;
+      case 'edit-hub': openHubDialog(V.hubId); break;
+      case 'new-folder': openFolderDialog(null); break;
+      case 'edit-folder': openFolderDialog(V.folderId); break;
+      case 'open-file': openFile(id); break;
+      case 'backup':
+        $('#backup-text').value = ''; $('#backup-file').value = ''; $('#backup-file-name').textContent = 'Nenhum arquivo escolhido';
+        $('#import-merge').checked = true; setErr('f-import', '');
+        $('#export-scope').innerHTML = '<option value="">Toda a estante</option>' + S.hubs.map(function (h) {
+          return '<option value="' + esc(h.id) + '"' + (V.mode === 'hub' && V.hubId === h.id ? ' selected' : '') + '>Só a matéria ' + esc(h.name) + '</option>';
+        }).join('');
+        openDialog($('#dlg-backup')); break;
+      case 'fav':
+        if (!it) return;
+        it.fav = !it.fav; save(); render(); toast(it.fav ? 'Adicionado aos favoritos' : 'Removido dos favoritos'); break;
+      case 'week':
+        if (!it) return;
+        it.week = !it.week; save(); render(); toast(it.week ? 'Separado para a aula da semana' : 'Removido da aula da semana'); break;
+      case 'clear-week':
+        askConfirm('Começar uma nova semana?', 'Os materiais saem da lista da aula da semana, mas continuam na estante.', 'Limpar lista').then(function (ok) {
+          if (!ok) return;
+          S.items.forEach(function (i) { i.week = false; }); save(); render(); toast('Lista da semana limpa');
+        });
+        break;
+      case 'clear-examples':
+        askConfirm('Remover os exemplos?', 'Os materiais de exemplo serão excluídos. As matérias e pastas continuam para você usar.', 'Remover exemplos').then(function (ok) {
+          if (!ok) return;
+          S.items = S.items.filter(function (i) { return !i.example; }); save(); render(); toast('Exemplos removidos');
+        });
+        break;
+    }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'goal-filter') { V.goal = e.target.value; render(); }
+  });
+  // Miniatura do YouTube indisponível: mantém o ícone do tipo
+  document.addEventListener('error', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('yt')) e.target.remove();
+  }, true);
+
+  var qTimer = null;
+  $('#q').addEventListener('input', function () {
+    var v = this.value;
+    $('#q-clear').hidden = !v;
+    clearTimeout(qTimer);
+    qTimer = setTimeout(function () { V.q = v; render(); }, 120);
+  });
+  $('#q').addEventListener('keydown', function (e) { if (e.key === 'Escape') setSearch(''); });
+  $('#q-clear').addEventListener('click', function () { setSearch(''); $('#q').focus(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.querySelector('dialog[open]')) {
+      e.preventDefault(); $('#q').focus();
+    }
+  });
+
+  /* =====================================================================
+   * Início
+   * ===================================================================== */
+  Store.open().then(function (ok) {
+    persistent = ok;
+    return Store.getState().catch(function () { return null; });
+  }).then(function (saved) {
+    var restored = null;
+    if (saved) { try { restored = sanitizeImport(saved, { keepFileRefs: true }).state; } catch (e) { restored = null; } }
+    if (restored) { S = restored; if (migrateState(S)) save(); }
+    else { S = seedState(); save(); }
+    V.hubId = S.hubs[0] ? S.hubs[0].id : null;
+    saveStatus = persistent ? 'Tudo salvo neste navegador' : 'Salvo só até fechar a página';
+    render();
+    document.documentElement.setAttribute('data-ready', '1');
+  });
+})();
+</script>
+
+</body>
+</html>
